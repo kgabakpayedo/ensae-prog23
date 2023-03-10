@@ -67,11 +67,33 @@ class Graph:
         self.graph[node1].append((node2, power_min, dist))
         self.graph[node2].append((node1, power_min, dist))
         self.nb_edges += 1
+
     
+    def powermin(self,node1,node2)::
+        """Cette fonction est spécialement crée pour compléter la fonction trajet
+        Il n'y a pas à s'inquéter de l'adjacence des nœuds si l'on suppose que la fonction trajet fait
+        bien son boulot. Ainsi les nœuds considérés dans les cas pratiques où nous utiliserons la fonction 
+        seront toujours adjacent.
+        """
+        voisins = self.graph[node1][i]
+        return [voisins for i in range len(voisins) if i == node2][1]
+
+
 
     def get_path_with_power(self, src, dest, power):
-        
-        raise NotImplementedError
+        p= False
+        i = 0
+        chemins = trajet(self,src,destination)
+        nb_chemins = len(chemins)
+        while p = False and i != len(chemins):
+            p max([powermin(self,chemins[i][j],chemins[i][j+1]) for j in range(1,nb_chemins)])
+            i+=1
+        if p == True :
+            output = f"Le camion peut aller de {src} à {dest} en faisant le parcours {chemin[i-1]}"
+        else :
+            output = f"Le camion ne peut pas couvrir le trajet entre {src} et {dest}"
+        return output
+
         
     def parcours(self, start, visited=[]):
         """On le nœud de départ à la liste visited par défaut vide (Sa valeur est actualisée au cours de 
