@@ -70,11 +70,53 @@ class Graph:
     
 
     def get_path_with_power(self, src, dest, power):
+        
         raise NotImplementedError
+        
+    def parcours(self, start, visited=[]):
+        """On le nœud de départ à la liste visited par défaut vide (Sa valeur est actualisée au cours de 
+        l'exécution de la fonction). 
+        Ensuite, pour chaque voisin du nœud de départ dans le graphe qui n'est pas encore dans visited, 
+        la fonction parcours est récursivement appliquée avec ce voisin comme nouveau nœud 
+        de départ et la liste visited se complète au fur et à mesure.
+        Si le graphe est vide on retourne la liste vide.
+
+        Args:
+        ----------
+            start (NodeType): Le Nœud duquel on part
+            visited (list, optional): Liste stockant les nouveaux nœus visités. Defaults to [].
+
+        Returns:
+        ----------
+            Visited: Liste contenant tous les nœuds visités.
+        """
+        if not self.graph :
+            return []
+        visited.append(start)
+        for node in self.graph[start]:
+            if node[0] not in visited:
+                parcours(self, node, visited)
+        return visited 
+
     
 
     def connected_components(self):
-        raise NotImplementedError
+        """La realtion "est connecté à" définit une relation d'équivalence sur l'ensemble des nœuds 
+        du graphe. Ainsi il suffit d'identifier un représentant d'une composante connexe par arc et
+        de trouver tous les nœuds de sa classe d'équivalence avec la fonction parcours.
+        On commence donc par le premier nœud du graphe puis on choisit le prochain sur la liste des nœuds
+        n'est pas joignable à partir de nœud précedent ; Il appartient à une autre composante connexe par arc.
+
+        Returns:
+            set: un set de set stockant chacun tous les nœuds appartenant à une composante connexe 
+            du graphe.  
+        """
+        linked_nodes = set()
+        l=[]
+        for node in self.nodes and not in l :
+             linked_nodes.add(set(parcours(self, node)))
+             l+=parcours(self,node) 
+        return linked_nodes 
 
 
     def connected_components_set(self):
