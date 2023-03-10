@@ -86,7 +86,7 @@ class Graph:
         chemins = trajet(self,src,destination)
         nb_chemins = len(chemins)
         while p = False and i != len(chemins):
-            p max([powermin(self,chemins[i][j],chemins[i][j+1]) for j in range(1,nb_chemins)])
+            p =< max([powermin(self,chemins[i][j],chemins[i][j+1]) for j in range(1,nb_chemins)])
             i+=1
         if p == True :
             output = f"Le camion peut aller de {src} à {dest} en faisant le parcours {chemin[i-1]}"
@@ -123,7 +123,7 @@ class Graph:
     
 
     def connected_components(self):
-        """La realtion "est connecté à" définit une relation d'équivalence sur l'ensemble des nœuds 
+        """La relation "est connecté à" définit une relation d'équivalence sur l'ensemble des nœuds 
         du graphe. Ainsi il suffit d'identifier un représentant d'une composante connexe par arc et
         de trouver tous les nœuds de sa classe d'équivalence avec la fonction parcours.
         On commence donc par le premier nœud du graphe puis on choisit le prochain sur la liste des nœuds
@@ -189,3 +189,20 @@ def graph_from_file(filename):
             else:
                 raise Exception("Format incorrect")
     return g
+
+def sorted_list_edge(g) :
+    """Retourne la liste des aretes rangées par ordre de puissance croissante.
+
+    Args:
+        g (Graph): 
+
+    Returns:
+        Liste: Liste de Tuples contenant les deux noeuds de l'arete ainsi que la puissance de celle ci
+    """
+    mylist=[]
+    for node in g.nodes() :
+        for voisin in g.graph[node]:
+            if (node,voisin[0],voisin[1]) and (voisin[0],node,voisin[1]) not in mylist :
+                mylist+=[(node,voisin[0],voisin[1])]
+    return mylist.sort(key=lambda x : x[2])    
+
