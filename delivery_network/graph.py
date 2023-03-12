@@ -68,32 +68,18 @@ class Graph:
         self.graph[node2].append((node1, power_min, dist))
         self.nb_edges += 1
 
-    
-    def powermin(self,node1,node2):
-        """Cette fonction est spécialement crée pour compléter la fonction trajet
-        Il n'y a pas à s'inquéter de l'adjacence des nœuds si l'on suppose que la fonction trajet fait
-        bien son boulot. Ainsi les nœuds considérés dans les cas pratiques où nous utiliserons la fonction 
-        seront toujours adjacent.
-        """
-        voisins = self.graph[node1]
-        c=len(voisins)
-        return [voisins[1] for i in range(c) if i == node2][1]
-
-
 
     def get_path_with_power(self, src, dest, power):
-        p= False
-        i = 0
-        chemins = trajet(self,src,destination)
+        chemins = trajet(self,src,dest)
         nb_chemins = len(chemins)
-        while p == False and i != len(chemins):
-            p != max([powermin(self,chemins[i][j],chemins[i][j+1]) for j in range(1,nb_chemins)])
-            i+=1
-        if p == True :
-            output = f"Le camion peut aller de {src} à {dest} en faisant le explore {chemin[i-1]}"
+        chemins_possibles=[]
+        for i in range (nb_chemins) :
+            if power >= max([powermin(self,chemins[i][j-1],chemins[i][j]) for j in range(1,len(chemins[i]))]):
+                chemins_possibles.append(chemins[i])
+        if chemins_possibles == [] :
+            return None
         else :
-            output = f"Le camion ne peut pas couvrir le trajet entre {src} et {dest}"
-        return output
+            return chemins_possibles
 
     
     def connected_components(self):
@@ -118,8 +104,7 @@ class Graph:
         """
         Should return path, min_power. 
         """
-        raise NotImplementedError
-
+        raise NotImplementedError 
 
 def graph_from_file(filename):
     """
@@ -223,6 +208,40 @@ def plot_path(graph, start, target, path, shortest_path):
     for i in range(len(shortest_path)-1):
         dot.edge(str(shortest_path[i]), str(shortest_path[i+1]), color='green', penwidth=3)
     # Render the graph
-    dot.render('graph')
+    dot.render('graph')  
+    
+    
+def trajet(g, src, dest, path=[]):
+    """
+    Return a list of all possible paths between the start and target nodes in the graph.
+    """
+    path = path + [src]
+    if src == dest:
+        return [path]
+    if src not in g.nodes :
+        return []
+    paths = []
+    for neighbor in g.graph[src]:
+        if neighbor[0] not in path:
+            new_paths = trajet(g, neighbor[0], dest, path)
+            for new_path in new_paths:
+                paths.append(new_path)
+    return paths 
+
+import math   
+    
+def powermin(g,node1,node2):
+    """Cette fonction est spécialement crée pour compléter la fonction trajet
+        Il n'y a pas à s'inquéter de l'adjacence des nœuds si l'on suppose que la fonction trajet fait
+        bien son boulot. Ainsi les nœuds considérés dans les cas pratiques où nous utiliserons la fonction 
+        seront toujours adjacent.
+        """
+    voisins = g.graph[node1]
+    c=len(voisins)
+    i=0
+    while i < c and voisins[i][0] != node2 :
+        i+=1
+    return voisins[i][1]
+
 
 
