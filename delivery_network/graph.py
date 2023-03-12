@@ -69,14 +69,15 @@ class Graph:
         self.nb_edges += 1
 
     
-    def powermin(self,node1,node2)::
+    def powermin(self,node1,node2):
         """Cette fonction est spécialement crée pour compléter la fonction trajet
         Il n'y a pas à s'inquéter de l'adjacence des nœuds si l'on suppose que la fonction trajet fait
         bien son boulot. Ainsi les nœuds considérés dans les cas pratiques où nous utiliserons la fonction 
         seront toujours adjacent.
         """
-        voisins = self.graph[node1][i]
-        return [voisins for i in range len(voisins) if i == node2][1]
+        voisins = self.graph[node1]
+        c=len(voisins)
+        return [voisins[1] for i in range(c) if i == node2][1]
 
 
 
@@ -85,68 +86,33 @@ class Graph:
         i = 0
         chemins = trajet(self,src,destination)
         nb_chemins = len(chemins)
-        while p = False and i != len(chemins):
-            p =< max([powermin(self,chemins[i][j],chemins[i][j+1]) for j in range(1,nb_chemins)])
+        while p == False and i != len(chemins):
+            p != max([powermin(self,chemins[i][j],chemins[i][j+1]) for j in range(1,nb_chemins)])
             i+=1
         if p == True :
-            output = f"Le camion peut aller de {src} à {dest} en faisant le parcours {chemin[i-1]}"
+            output = f"Le camion peut aller de {src} à {dest} en faisant le explore {chemin[i-1]}"
         else :
             output = f"Le camion ne peut pas couvrir le trajet entre {src} et {dest}"
         return output
 
-        
-    def parcours(self, start, visited=[]):
-        """On le nœud de départ à la liste visited par défaut vide (Sa valeur est actualisée au cours de 
-        l'exécution de la fonction). 
-        Ensuite, pour chaque voisin du nœud de départ dans le graphe qui n'est pas encore dans visited, 
-        la fonction parcours est récursivement appliquée avec ce voisin comme nouveau nœud 
-        de départ et la liste visited se complète au fur et à mesure.
-        Si le graphe est vide on retourne la liste vide.
-
-        Args:
-        ----------
-            start (NodeType): Le Nœud duquel on part
-            visited (list, optional): Liste stockant les nouveaux nœus visités. Defaults to [].
-
-        Returns:
-        ----------
-            Visited: Liste contenant tous les nœuds visités.
-        """
-        if not self.graph :
-            return []
-        visited.append(start)
-        for node in self.graph[start]:
-            if node[0] not in visited:
-                parcours(self, node, visited)
-        return visited 
-
     
-
     def connected_components(self):
-        """La relation "est connecté à" définit une relation d'équivalence sur l'ensemble des nœuds 
-        du graphe. Ainsi il suffit d'identifier un représentant d'une composante connexe par arc et
-        de trouver tous les nœuds de sa classe d'équivalence avec la fonction parcours.
-        On commence donc par le premier nœud du graphe puis on choisit le prochain sur la liste des nœuds
-        n'est pas joignable à partir de nœud précedent ; Il appartient à une autre composante connexe par arc.
-
-        Returns:
-            set: un set de set stockant chacun tous les nœuds appartenant à une composante connexe 
-            du graphe.  
-        """
-        linked_nodes = set()
+        linked_nodes_list = []
         l=[]
-        for node in self.nodes and not in l :
-             linked_nodes.add(set(parcours(self, node)))
-             l+=parcours(self,node) 
-        return linked_nodes 
+        for node in self.nodes :
+            if node not in l :
+                linked_nodes_list.append(set((explore(self, node))))
+                l+=explore(self,node) 
+        return linked_nodes_list
 
-
-    def connected_components_set(self):
+    def connected_components_set(self): 
         """
         The result should be a set of frozensets (one per component), 
         For instance, for network01.in: {frozenset({1, 2, 3}), frozenset({4, 5, 6, 7})}
+
+        Complexity = O(V+E+k*n)
         """
-        return set(map(frozenset, self.connected_components()))
+        return set(frozenset(s) for s in self.connected_components())
     
     def min_power(self, src, dest):
         """
@@ -205,4 +171,58 @@ def sorted_list_edge(g) :
             if (node,voisin[0],voisin[1]) and (voisin[0],node,voisin[1]) not in mylist :
                 mylist+=[(node,voisin[0],voisin[1])]
     return mylist.sort(key=lambda x : x[2])    
+
+
+def explore(g, start, visited=None):
+    """On ajoute le nœud de départ à la liste visited par défaut vide (Sa valeur est actualisée au cours de 
+        l'exécution de la fonction). 
+        Ensuite, pour chaque voisin du nœud de départ dans le graphe qui n'est pas encore dans visited, 
+        la fonction explore est récursivement appliquée avec ce voisin comme nouveau nœud 
+        de départ et la liste visited se complète au fur et à mesure.
+        Si le graphe est vide on retourne la liste vide.
+
+        Args:
+        ----------
+            start (NodeType): Le Nœud duquel on part
+            visited (list, optional): Liste stockant les nouveaux nœus visités. Defaults to [].
+
+        Returns:
+        ----------
+            Visited: Liste contenant tous les nœuds visités.
+    """
+    if visited is None :
+        visited=[]
+    visited.append(start)
+    for node in g.graph[start]:
+        if node[0] not in visited:
+            explore(g, node[0], visited)
+    return visited 
+    
+from graphviz import Digraph
+
+def plot_path(graph, start, target, path, shortest_path):
+    """
+    Plot the graph, the path to the target node, and the shortest path found by the BFS algorithm.
+    """
+    dot = Digraph(comment='Graph')
+    # Add nodes to the graph
+    for node in graph.keys():
+        dot.node(str(node))
+    # Add edges to the graph
+    for node, neighbors in graph.items():
+        for neighbor in neighbors:
+            dot.edge(str(node), str(neighbor))
+    # Mark the start node
+    dot.node(str(start), color='green', style='filled')
+    # Mark the target node
+    dot.node(str(target), color='red', style='filled')
+    # Highlight the path to the target node
+    for i in range(len(path)-1):
+        dot.edge(str(path[i]), str(path[i+1]), color='blue')
+    # Highlight the shortest path found by the BFS algorithm
+    for i in range(len(shortest_path)-1):
+        dot.edge(str(shortest_path[i]), str(shortest_path[i+1]), color='green', penwidth=3)
+    # Render the graph
+    dot.render('graph')
+
 
