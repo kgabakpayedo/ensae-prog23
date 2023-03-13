@@ -102,9 +102,14 @@ class Graph:
     
     def min_power(self, src, dest):
         """
+        We start by returning all possible paths between the nodes. Then, we create a list
+        giving the highest powermin for each edge in the path, for each path. Finally we return
+        the first path where this value is the lowest. 
         Should return path, min_power. 
         """
-        raise NotImplementedError 
+        paths = trajet(self, src, dest)
+        paths_list = [(paths[i],max([powermin(self,paths[i][j-1],paths[i][j]) for j in range(1,len(paths[i]))])) for i in range(len(paths))]
+        return min(paths_list, key = lambda x : x[1])
 
 def graph_from_file(filename):
     """
@@ -185,28 +190,28 @@ def explore(g, start, visited=None):
     
 from graphviz import Digraph
 
-def plot_path(graph, start, target, path, shortest_path):
+def plot_path(g, start, target, shortest_path:list):
     """
     Plot the graph, the path to the target node, and the shortest path found by the BFS algorithm.
     """
+    m = g.nodes
     dot = Digraph(comment='Graph')
     # Add nodes to the graph
-    for node in graph.keys():
-        dot.node(str(node))
+    for n in m:
+        dot.node(str(n))
     # Add edges to the graph
-    for node, neighbors in graph.items():
-        for neighbor in neighbors:
-            dot.edge(str(node), str(neighbor))
+    for n in m :
+        for neighbor in g.graph[n]:
+            dot.edge(str(n), str(neighbor[0]))
     # Mark the start node
     dot.node(str(start), color='green', style='filled')
     # Mark the target node
     dot.node(str(target), color='red', style='filled')
-    # Highlight the path to the target node
-    for i in range(len(path)-1):
-        dot.edge(str(path[i]), str(path[i+1]), color='blue')
+    """
     # Highlight the shortest path found by the BFS algorithm
     for i in range(len(shortest_path)-1):
-        dot.edge(str(shortest_path[i]), str(shortest_path[i+1]), color='green', penwidth=3)
+        print(type(shortest_path[i]))
+        dot.edge(str(shortest_path[i]), str(shortest_path[i+1]), color='green', penwidth=3)"""
     # Render the graph
     dot.render('graph')  
     
@@ -228,7 +233,6 @@ def trajet(g, src, dest, path=[]):
                 paths.append(new_path)
     return paths 
 
-import math   
     
 def powermin(g,node1,node2):
     """Cette fonction est spécialement crée pour compléter la fonction trajet
