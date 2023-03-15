@@ -1,7 +1,7 @@
 class UnionFind :
     """"""
     def __init__(self,x):
-        self.element(x)
+        self.element=x
         self.parent=self
 
     def Find(self) :
@@ -11,6 +11,9 @@ class UnionFind :
             self.parent = self.parent.Find()
             return self.parent()
 
-    def Union(x,y)
+    def Union(self,y) :
+        if self.Find() != y.Find() :
+            x.Find().parent = y.Find() 
+
 
 

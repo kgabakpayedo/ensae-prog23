@@ -67,9 +67,53 @@ class Graph:
         self.graph[node1].append((node2, power_min, dist))
         self.graph[node2].append((node1, power_min, dist))
         self.nb_edges += 1
+    
+    def min_powerr(self, src, dest):
+        """
+        Should return path, min_power. 
+        """
+        a=0
+        b=0
+        c=0
+        m=0
+        t=[]
+        for i in self.graph:
+            for j in self.graph[i]:
+                if j[1]!=0:
+                    t.append(j[1])
+        b=sum(t)
+        m=min(t)
+        while b-a>=m:
+            c=(a+b)/2
+            if self.get_path_with_power(src,dest,c)!=None:
+                b=c
+            else:
+                a=c
+        v=[]
+        U=self.get_path_with_power(src,dest,b)
+        if U==None:
+            return None
+        for i in range(len(U)-1):
+            for j in self.graph[U[i]]:
+                if j[0]==U[i+1]:
+                    v.append(j[1])
+        return [U,max(v)]
+
+    
 
 
     def get_path_with_power(self, src, dest, power):
+        """
+        On commence par enregistrer la liste de liste donnant tous les trajets possibles 
+        Ensuite pour chaque chemin on compare la puissance du camion avec la plus grande puissance 
+        qu'il rencontrera entre deux nœuds voisins du chemin. Le chemin est naturellement enregistré 
+        si la puissance du camion est supérieur à cette valeur maximale.
+        Si le camion ne peut prendre aucun chemin on retourne None. Sinon on retourne une liste de liste 
+        avec chaque trajet possible.
+
+        Complexité = O(m*n)
+    
+        """
         chemins = trajet(self,src,dest)
         nb_chemins = len(chemins)
         chemins_possibles=[]
@@ -79,7 +123,7 @@ class Graph:
         if chemins_possibles == [] :
             return None
         else :
-            return chemins_possibles
+            return (chemins_possibles, dist_min(self, chemins_possibles))
 
     
     def connected_components(self):
@@ -188,25 +232,58 @@ def explore(g, start, visited=None):
             explore(g, node[0], visited)
     return visited 
     
-from graphviz import Digraph
+from graphviz import Graph as GG
 
-def plot_path(g, start, target, shortest_path:list):
+def plot_graph(g):
     """
-    Plot the graph, the path to the target node, and the shortest path found by the BFS algorithm.
+    Retourne le graphe
     """
+    l = []
     m = g.nodes
-    dot = Digraph(comment='Graph')
+    dot = GG('Graph')
     # Add nodes to the graph
     for n in m:
         dot.node(str(n))
     # Add edges to the graph
     for n in m :
         for neighbor in g.graph[n]:
-            dot.edge(str(n), str(neighbor[0]))
-    # Mark the start node
+            if {n,neighbor[0]} not in l :
+                 dot.edge(str(n), str(neighbor[0]), xlabel= str(neighbor[2]))
+                 l.append({n,neighbor[0]})
+
+    # Render the graph
+    dot.render('graph')  
+    
+
+def plot_path(g, start, target,power, shortest_path=[]):
+    """
+    Plot the graph, the path to the target node, and the shortest path found by the BFS algorithm.
+    """
+    if g.get_path_with_power(start,target,power) is None :
+        raise ValueError("Trajet impossible")
+    shortest_path = g.get_path_with_power(start,target,power)[1][0]
+    l=[]
+    m = g.nodes
+    dot = GG('Graph')
+    # Add nodes to the graph
+    for n in m:
+        dot.node(str(n))
+    # Add edges to the graph
+    for n in m :
+        for neighbor in g.graph[n]:
+            if {n,neighbor[0]} not in l :
+                 dot.edge(str(n), str(neighbor[0]), xlabel= str(neighbor[2]))
+                 l.append({n,neighbor[0]})
+    
+    # Colore en vert le nœud de départ
     dot.node(str(start), color='green', style='filled')
-    # Mark the target node
+    
+    # Colore en rouge le nœud d'arrivée 
     dot.node(str(target), color='red', style='filled')
+    
+    #Colore en bleu les nœuds intermédiaires
+    for i in range(1,len(shortest_path)-1):
+        dot.node(str(shortest_path[i]), color='blue', style='filled')
     """
     # Highlight the shortest path found by the BFS algorithm
     for i in range(len(shortest_path)-1):
@@ -218,7 +295,10 @@ def plot_path(g, start, target, shortest_path:list):
     
 def trajet(g, src, dest, path=[]):
     """
-    Return a list of all possible paths between the start and target nodes in the graph.
+    Retourne tous les trajets possibles entre les nœuds src et dest en utilisant à peu 
+    près le même principe de récursivité que dans le parcours en profondeur du graphe.
+
+    Complexité = O(m*n)
     """
     path = path + [src]
     if src == dest:
@@ -232,13 +312,14 @@ def trajet(g, src, dest, path=[]):
             for new_path in new_paths:
                 paths.append(new_path)
     return paths 
-
-    
+ 
 def powermin(g,node1,node2):
     """Cette fonction est spécialement crée pour compléter la fonction trajet
         Il n'y a pas à s'inquéter de l'adjacence des nœuds si l'on suppose que la fonction trajet fait
         bien son boulot. Ainsi les nœuds considérés dans les cas pratiques où nous utiliserons la fonction 
         seront toujours adjacent.
+
+        Complexité = O(1)
         """
     voisins = g.graph[node1]
     c=len(voisins)
@@ -246,6 +327,31 @@ def powermin(g,node1,node2):
     while i < c and voisins[i][0] != node2 :
         i+=1
     return voisins[i][1]
+
+def dist(g,node1,node2):
+    """Prend en paramètre un graphe et deux nœuds de celui-ci puis retourne la distance entre ceux-ci 
+    On utilisera cette fonction dans des cas où nos nœuds sont nécéssairement adjacents donc aucun problème .
+    """
+    edge = list(filter(lambda x : x[0]==node2 , g.graph[node1]))
+    return edge[0][2]
+
+    
+    
+def dist_min(g, chemins:list):
+    """Prend en paramètre une liste donnant les trajets entre deux noeuds d'un graphe g 
+    et retourne le trajet de distance minimale sous forme de tuple (chemin,distance).
+    On appelle distmin dans get_path_with_power uniquement lorsqu'il y a au moins un chemin possible 
+    pour le camion c'est-à-dire lorsque chemins_possibles != []"""
+
+    for i in range(len(chemins)) :
+        chemins[i] = (chemins[i], sum([dist(g,chemins[i][j],chemins[i][j+1]) for j in range((len(chemins[i])-1))]))
+    
+    chemins.sort(key = lambda x : x[1])
+    
+    return chemins[0]
+
+
+
 
 
 

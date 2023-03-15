@@ -1,5 +1,4 @@
-// Graph
-digraph {
+graph "Graph" {
 	1
 	2
 	3
@@ -10,24 +9,18 @@ digraph {
 	8
 	9
 	10
-	1 -> 2
-	1 -> 6
-	1 -> 8
-	2 -> 1
-	2 -> 3
-	2 -> 5
-	3 -> 2
-	3 -> 4
-	4 -> 3
-	4 -> 10
-	5 -> 2
-	5 -> 7
-	6 -> 1
-	7 -> 5
-	8 -> 1
-	8 -> 9
-	9 -> 8
-	10 -> 4
+	1 -- 2 [xlabel=1]
+	1 -- 6 [xlabel=1]
+	1 -- 8 [xlabel=1]
+	2 -- 3 [xlabel=1]
+	2 -- 5 [xlabel=1]
+	3 -- 4 [xlabel=1]
+	4 -- 10 [xlabel=1]
+	5 -- 7 [xlabel=1]
+	8 -- 9 [xlabel=1]
 	1 [color=green style=filled]
-	4 [color=red style=filled]
+	10 [color=red style=filled]
+	2 [color=blue style=filled]
+	3 [color=blue style=filled]
+	4 [color=blue style=filled]
 }
