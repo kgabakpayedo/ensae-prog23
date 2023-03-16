@@ -353,5 +353,123 @@ def dist_min(g, chemins:list):
 
 
 
+#Pour utiliser l'algorithme de Kruskal, on crée d'abord des fonctions Union et Find.
+#Find prend en argument le tableau des parents des noeuds d'un arbre et un noeud, et renvoie la racine de l'arbre ou est le noeud.
+#Union prend en argument ce même tableau et deux noeuds.
+#Il trouve d'abord les racines des deux noeuds et si elles sont différentes, c'est que les noeuds sont dans des arbres différents.
+#La fonction Union réunit alors les deux arbres, en définissant une des deux racines comme parent de l'autre.
+
+def Union(a,b,P):
+    A=Find(P,a)
+    B=Find(P,b)
+    if A!=B:
+        P[A-1]=B
+
+def Find(P,i):
+    if P[i-1]==i:
+        return i
+    return Find(P,P[i-1])
+
+def kruskal(g):
+    T=[]
+    P=[i for i in range(1,len(g.graph)+1)]
+    Q=[]
+    for i in range(1,len(g.graph)+1):
+        for j in range(len(g.graph[i])):
+            T.append([i,g.graph[i][j][0],g.graph[i][j][1]])
+    T.sort(key=lambda u:u[2])
+    
+    #T est un tableau représentant le graphe g dans le format [noeud1,noeud2,puissance], trié par puissance des arêtes croissante.
+    #P est le tableau des parents des noeuds de P.
+    #Q est un tableau qui regroupe les noeuds et arêtes qui conviennent, et sera converti en un graphe G.
+    
+    c1,c2=0,0
+    while c2<len(P)-1:
+        
+        #On parcours les noeuds de g et lorsque l'on trouve deux noeuds ayant des parents différents, on les rassemble avec Union.
+        #Comme T était trié, on traite bien les arêtes de puissance minimale en premier.
+        #Lorsque c2=len(P)-1, cela veut dire que Q possède nb_noeuds-1 éléments, et l'arbre peut être défini par les nb_noeuds-1 arêtes définies par Q. Donc la boucle while s'arrête.
+        
+        c1=c1+1
+        p=Find(P,T[c1][0]-1)
+        q=Find(P,T[c1][1]-1)
+        if p!=q:
+            c2=c2+1
+            Q.append(T[c1])
+            Union(p,q,P)
+    
+    #On peut alors définir le graphe G représentant cet arbre, et on le renvoie.
+    
+    G=Graph([i for i in range(1,len(Q)+1)])
+    for i in range(len(Q)):
+        G.add_edge(Q[i][0],Q[i][1],Q[i][2])
+    return G
+
+    #L'algorithme de Kruskal est de complexité O(E*ln(E)), qui est la complexité du tri de T.
 
 
+def min_power_K(g,src,dest):
+    
+    #Ainsi, on peut redéfinir une fonction min_power_K qui cette fois applique min_power à l'arbre couvrant minimal de g.
+    #Sa complexité sera alors O(E*ln(E)) pour la même raison que celle de min_power est O(E*V).
+    
+    G=kruskal(g)
+    h=G.min_power(src,dest)
+    return h
+
+
+#Pour les tests de temps, on crée d'abord une fonction pour récupérer les trajets des dossiers routes.x.in, puis on crée les fonctions de test
+
+def trajets_from_route(a):
+    t=[]
+    with open("input/routes."+str(a)+".in", "r") as file:
+        n=int(file.readline().split()[0])
+        for _ in range(n):
+            t.append(list(map(int, file.readline().split())))
+    return t
+
+
+def time_test(N):
+    U=[]
+    V=[[0] for i in range(10)]
+    for k in range(1,11):
+        g=graph_from_file("input/network."+str(k)+".in")
+        h=trajets_from_route(k)
+        U.append(h[0])
+        for _ in range(N):
+            w=numpy.random.randint(0,h[0]-1)
+            src=h[1][w][0]
+            dest=h[1][w][1]
+            t1=time.perf_counter()
+            t=g.min_power(src,dest)
+            t2=time.perf_counter()
+            V[k].append(t2-t1)
+    return [U[i]*sum(V[i])/N for i in range(10)]
+
+def time_test_K(N):
+    U=[]
+    V=[[0] for i in range(10)]
+    for k in range(1,11):
+        g=graph_from_file("input/network."+str(k)+".in")
+        h=trajets_from_route(k)
+        U.append(h[0])
+        for _ in range(N):
+            w=numpy.random.randint(0,h[0]-1)
+            src=h[1][w][0]
+            dest=h[1][w][1]
+            t1=time.perf_counter()
+            t=min_power_K(g,src,dest)
+            t2=time.perf_counter()
+            V[k].append(t2-t1)
+    return [U[i]*sum(V[i])/N for i in range(10)]
+
+#pour routes.1.in, on trouve un temps moyen de 0.55s pour min_power et 0.04s pour min_power_K.
+
+
+def catalog_from_trucks(a):
+    t=[]
+    with open("input/trucks."+str(a)+".in", "r") as file:
+        n=int(file.readline().split())
+        for _ in range(n):
+            t.append(list(map(int, file.readline().split())))
+    return t
