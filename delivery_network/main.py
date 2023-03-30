@@ -1,8 +1,7 @@
 from graph import *
 
 data_path = "input/"
-file_name = "network.1.in"
+file_name = "routes.1.in"
+graphname = "network.1.in"
 
-g = graph_from_file(data_path + file_name)
-
-print(catalog_from_trucks(1))
+print(routes_out(data_path + file_name , data_path + graphname))

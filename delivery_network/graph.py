@@ -412,7 +412,7 @@ def min_power_K(g,src,dest):
     
     #Ainsi, on peut redéfinir une fonction min_power_K qui cette fois applique min_power à l'arbre couvrant minimal de g.
     #Sa complexité sera alors O(E*ln(E)) pour la même raison que celle de min_power est O(E*V).
-    
+
     G=kruskal(g)
     h=G.min_power(src,dest)
     return h
@@ -466,10 +466,22 @@ def time_test_K(N):
 #pour routes.1.in, on trouve un temps moyen de 0.55s pour min_power et 0.04s pour min_power_K.
 
 
-def catalog_from_trucks(a):
+def list_paths(filename):
+    """Allow us to obtain a list of a list from a routes.x.in file, containing all the paths with their utility
+    """
     t=[]
-    with open("input/trucks."+str(a)+".in", "r") as file:
-        n=int(file.readline().split())
+    with open(filename, "r") as file:
+        n = int(file.readline())
         for _ in range(n):
             t.append(list(map(int, file.readline().split())))
+               
+    return t
+
+def routes_out(filename,graphname) : 
+    t=[]
+    l=list_paths(filename)
+    g=graph_from_file(graphname)
+    for i in range(len(l)) :
+        t.append(min_power_K(g, l[i][0], l[i][1]))
+
     return t
