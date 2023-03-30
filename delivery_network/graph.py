@@ -485,3 +485,63 @@ def routes_out(filename,graphname) :
         t.append(min_power_K(g, l[i][0], l[i][1]))
 
     return t
+
+
+def camions_from_truck(a):
+    t=[]
+    with open("trucks."+str(a)+".in.txt") as file:
+        n=int(file.readline().split()[0])
+        for _ in range(n):
+            t.append(list(map(int, file.readline().split())))
+    return [n,t]
+
+
+
+g=graph_from_file("network.1.in.txt")
+T=trajets_from_route(1)
+C=camions_from_truck(2)
+
+Q=[min_power_K(g,T[1][i][0],T[1][i][1]) for i in range(len(T[1]))]
+R=[0 for i in range(len(T[1]))]
+v=[T[1][i][2] for i in range(len(T[1]))]
+m=max([C[1][j][1] for j in range(len(C[1]))])
+w=[m for i in range(len(Q))]
+for i in range(len(w)):
+    for j in range(len(C[1])):
+        if w[i]>C[1][j][1] and C[1][j][0]>=Q[i][1]:
+            w[i]=C[1][j][1]
+            R[i]=j
+            
+B=25*10**9
+d={}
+t=[]
+
+
+
+def knapsack(w,v,B,n): #O(B*len(T[1]))
+    if n==0 or B==0:
+        return 0
+    if (n,B) in d:
+        return d[(n,B)]
+    if w[n-1]<=B:
+        d[(n,B)]=max(v[n-1]+knapsack(w,v,B-w[n-1],n-1),knapsack(w,v,B,n-1))
+        return d[(n,B)]
+    else:
+        d[(n,B)]=knapsack(w,v,B,n-1)
+        return d[(n,B)]
+
+
+def greedy(w,v,B):
+    r=[v[i]/w[i] for i in range(len(v))]
+    V=0
+    j=0
+    while B>0 and len(t)!=len(r):
+        M=max([r[i] for i in range(len(r)) if not i in t])
+        for i in range(len(r)):
+            if r[i]==M and i not in t:
+                j=i
+        B-=w[j]
+        V+=v[j]
+        t.append(j)
+    if B<0:
+        t.pop()
